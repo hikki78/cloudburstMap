@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud Burst Events Map with Bar Graph</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #map {
+        height: 50vh;
+        width: calc(100% - 20px); /* Adjust map width and border size here */
+        border: 10px solid #ccc; /* Adjust map border size and color here */
+        margin: 10px;
+      }
+
+      #chart-container {
+        width: calc(100% - 20px); /* Adjust chart container width and border size here */
+        max-width: 800px;
+        box-sizing: border-box;
+        margin: 20px 10px;
+        border: 10px solid #ddd; /* Adjust chart container border size and color here */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="chart-container">
+      <canvas id="barChart"></canvas>
+    </div>
+
+    <script>
+      var data = [
+  {
+    "Location": "Alaknanda valley (between Joshimath and Chamoli)",
+    "Date": 20,
+    "Month": 7,
+    "Year": 1970,
+    "Latitude": "29.88°N",
+    "Longitude": "79.35°E"
+  },
+  {
+    "Location": "Dobata Village, Pithoragarh district",
+    "Date": 13,
+    "Month": 7,
+    "Year": 1971,
+    "Latitude": "29.58286100°N",
+    "Longitude": "80.21818500°E"
+  },
+  {
+    "Location": "Dobata Village, Pithoragarh district",
+    "Date": 14,
+    "Month": 7,
+    "Year": 1971,
+    "Latitude": "29.58286100°N",
+    "Longitude": "80.21818500°E"
+  },
+  {
+    "Location": "Dobata Village, Pithoragarh district",
+    "Date": 15,
+    "Month": 7,
+    "Year": 1971,
+    "Latitude": "29.58286100°N",
+    "Longitude": "80.21818500°E"
+  },
+  {
+    "Location": "Dobata Village, Pithoragarh district",
+    "Date": 16,
+    "Month": 7,
+    "Year": 1971,
+    "Latitude": "29.58286100°N",
+    "Longitude": "80.21818500°E"
+  },
+  {
+    "Location": "Dobata Village, Pithoragarh district",
+    "Date": 17,
+    "Month": 7,
+    "Year": 1971,
+    "Latitude": "29.58286100°N",
+    "Longitude": "80.21818500°E"
+  },
+  {
+    "Location": "Dobata Village, Pithoragarh district",
+    "Date": 18,
+    "Month": 7,
+    "Year": 1971,
+    "Latitude": "29.58286100°N",
+    "Longitude": "80.21818500°E"
+  },
+  {
+    "Location": "Dobata Village, Pithoragarh district",
+    "Date": 19,
+    "Month": 7,
+    "Year": 1971,
+    "Latitude": "29.58286100°N",
+    "Longitude": "80.21818500°E"
+  },
+  {
+    "Location": "Kanoldia Gad, Uttarkashi",
+    "Date": 4,
+    "Month": 8,
+    "Year": 1978,
+    "Latitude": "30.73°N",
+    "Longitude": "78.45° E"
+  },
+  {
+    "Location": "Kanoldia Gad, Uttarkashi",
+    "Date": 5,
+    "Month": 8,
+    "Year": 1978,
+    "Latitude": "30.73°N",
+    "Longitude": "78.45° E"
+  },
+  {
+    "Location": "Saikot, Chamoli",
+    "Date": 17,
+    "Month": 6,
+    "Year": 1979,
+    "Latitude": "30.4°N",
+    "Longitude": "79.3°E"
+  },
+  {
+    "Location": "Kuntha, Rudraprayag",
+    "Date": 17,
+    "Month": 8,
+    "Year": 1979,
+    "Latitude": "30.4°N",
+    "Longitude": "79.05°E"
+  },
+  {
+    "Location": "Sirwari, Rudraprayag",
+    "Date": 17,
+    "Month": 8,
+    "Year": 1979,
+    "Latitude": "29.9°N",
+    "Longitude": "79.09°E"
+  },
+  {
+    "Location": "Gyansu Nala, Uttarkashi",
+    "Date": 24,
+    "Month": 6,
+    "Year": 1980,
+    "Latitude": "30.7333°N",
+    "Longitude": "78.4282°E"
+  },
+  {
+    "Location": "Gyansu Nala, Uttarkashi",
+    "Date": 25,
+    "Month": 6,
+    "Year": 1980,
+    "Latitude": "30.7333° N",
+    "Longitude": "78.4282° E"
+  },
+  {
+    "Location": "Mandakhal Chennil, Pauri Garhwal",
+    "Date": 31,
+    "Month": 7,
+    "Year": 1982,
+    "Latitude": "29.8°N",
+    "Longitude": "78.7°E"
+  },
+  {
+    "Location": "Karmi, Kapkot, Bageshwar",
+    "Date": 23,
+    "Month": 7,
+    "Year": 1983,
+    "Latitude": "30.1°N",
+    "Longitude": "79.8°E"
+  },
+  {
+    "Location": "Nilkanth, Pauri Garhwal",
+    "Date": 7,
+    "Month": 9,
+    "Year": 1990,
+    "Latitude": "30.7°N",
+    "Longitude": "78.6°E"
+  },
+  {
+    "Location": "Dewar Khadora, Chamoli",
+    "Date": 16,
+    "Month": 8,
+    "Year": 1991,
+    "Latitude": "30.4°N",
+    "Longitude": "79.2°E"
+  },
+  {
+    "Location": "Gangolgoan, Chamoli",
+    "Date": 16,
+    "Month": 8,
+    "Year": 1991,
+    "Latitude": "30.4°N",
+    "Longitude": "79.2°E"
+  },
+  {
+    "Location": "Khankrakhet hill, Gadni, Chamoli",
+    "Date": 9,
+    "Month": 2,
+    "Year": 1992,
+    "Latitude": "30.53438889°N",
+    "Longitude": " 79.27047222°E"
+  },
+  {
+    "Location": "Bhintai, Pauri Garhwal ",
+    "Date": 13,
+    "Month": 8,
+    "Year": 1995,
+    "Latitude": "30.1°N ",
+    "Longitude": "78.7°E"
+  },
+  {
+    "Location": "Berinaga, Pithoragarh",
+    "Date": 17,
+    "Month": 7,
+    "Year": 1996,
+    "Latitude": "29.7°N",
+    "Longitude": "80.05°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": "11-19",
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 12,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 13,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 14,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 15,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 16,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 17,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 18,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Bhenti-Paundar villages, Okhimath tehsil, Rudraprayag",
+    "Date": 19,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "30.55°N",
+    "Longitude": "79.21°E"
+  },
+  {
+    "Location": "Malpa, Pithoragarh",
+    "Date": 17,
+    "Month": 8,
+    "Year": 1998,
+    "Latitude": "29.582861°N",
+    "Longitude": " 80.218185°E"
+  },
+  {
+    "Location": "Phata-Byung, Ukhimath tehsil, Rudraprayag",
+    "Date": 16,
+    "Month": 7,
+    "Year": 2001,
+    "Latitude": "30.57715°N",
+    "Longitude": "78.97581°E"
+  },
+  {
+    "Location": "Gona, Tehri",
+    "Date": 31,
+    "Month": 8,
+    "Year": 2001,
+    "Latitude": "30.36ºN",
+    "Longitude": "78.68°E"
+  },
+  {
+    "Location": "Marwari and Agunda, Bhudakedar (Thati Kathur) in Balganga valley, Tehri",
+    "Date": 8,
+    "Month": 10,
+    "Year": 2002,
+    "Latitude": "30.293461°N ",
+    "Longitude": "78.524094°E"
+  },
+  {
+    "Location": "Shillagarh, Himachal Pradesh",
+    "Date": 16,
+    "Month": 7,
+    "Year": 2003,
+    "Latitude": "31.5ºN",
+    "Longitude": "77°E"
+  },
+  {
+    "Location": "Aamparav, Nainital",
+    "Date": 23,
+    "Month": 9,
+    "Year": 2004,
+    "Latitude": "29.380304°N",
+    "Longitude": "79.463570° E"
+  },
+  {
+    "Location": "Govindghat, Tuphani nala, Chamoli",
+    "Date": 29,
+    "Month": 6,
+    "Year": 2005,
+    "Latitude": "30.6185°N",
+    "Longitude": "79.5617°E"
+  },
+  {
+    "Location": "Govindghat, Tuphani nala, Chamoli",
+    "Date": 30,
+    "Month": 6,
+    "Year": 2005,
+    "Latitude": "30.6185°N",
+    "Longitude": "79.5617°E"
+  },
+  {
+    "Location": "Vijaynagar, Agastmuni, Rudraprayag",
+    "Date": 21,
+    "Month": 7,
+    "Year": 2005,
+    "Latitude": "30.3917°N",
+    "Longitude": " 79.0299°E"
+  },
+  {
+    "Location": "Jhakhla and Lah, Pithoragarh",
+    "Date": 18,
+    "Month": 8,
+    "Year": 2009,
+    "Latitude": "29.582861°N",
+    "Longitude": "80.218185°E"
+  },
+  {
+    "Location": "Leh, Jammu & Kasmir",
+    "Date": 8,
+    "Month": 6,
+    "Year": 2010,
+    "Latitude": "34.09ºN",
+    "Longitude": "77.34°E"
+  },
+  {
+    "Location": "Sumgarh Village, Kapkot tehsil, Bageshwar",
+    "Date": 18,
+    "Month": 9,
+    "Year": 2010,
+    "Latitude": "30.10466°N",
+    "Longitude": "79.85275°E"
+  },
+  {
+    "Location": "Pandrasu bridge, Uttarkashi",
+    "Date": 8,
+    "Month": 3,
+    "Year": 2012,
+    "Latitude": "30.7334989°N",
+    "Longitude": "78.4246395°E"
+  },
+  {
+    "Location": "Ukhimath, Rudraprayag",
+    "Date": 13,
+    "Month": 9,
+    "Year": 2012,
+    "Latitude": "30.50°N ",
+    "Longitude": " 79.25°E"
+  },
+  {
+    "Location": "Rudraprayag, Chamoli, Uttarkashi, Bageshwar, Pithoragarh, Uttarakhand",
+    "Date": 16,
+    "Month": 6,
+    "Year": 2013,
+    "Latitude": "30.8°N",
+    "Longitude": "79.1°E"
+  },
+  {
+    "Location": "Rudraprayag, Chamoli, Uttarkashi, Bageshwar, Pithoragarh, Uttarakhand",
+    "Date": 17,
+    "Month": 6,
+    "Year": 2013,
+    "Latitude": "30.8°N",
+    "Longitude": "79.1°E"
+  },
+  {
+    "Location": "Kemra and Siliara, Kothiara, Tehri",
+    "Date": 28,
+    "Month": 5,
+    "Year": 2016,
+    "Latitude": "30.57°N",
+    "Longitude": "78.68°E"
+  },
+  {
+    "Location": "Didihat, Bastari and Naulra villages, Didihat and Thal Tehsils of Pithoragarh district In Bastari and Naulra villages respectively",
+    "Date": 7,
+    "Month": 1,
+    "Year": 2016,
+    "Latitude": "29.582861°N",
+    "Longitude": "80.218185°E"
+  },
+  {
+    "Location": "Tatalgaon and Bijrani near Chaukhutia",
+    "Date": 26,
+    "Month": 6,
+    "Year": 2017,
+    "Latitude": "29.4613°N",
+    "Longitude": "79.1478°E"
+  },
+  {
+    "Location": "Mangti and Malpa, Dharachula tehsil, Pithoragarh",
+    "Date": 14,
+    "Month": 8,
+    "Year": 2017,
+    "Latitude": "30.14209°N",
+    "Longitude": "80.52815°E"
+  },
+  {
+    "Location": "Malari village of Niti Ghati in Joshimath tehsil, Chamoli",
+    "Date": 19,
+    "Month": 7,
+    "Year": 2018,
+    "Latitude": "30.77508°N",
+    "Longitude": "79.87241°E"
+  },
+  {
+    "Location": "Mori tehsil of Uttarkashi district",
+    "Date": 18,
+    "Month": 8,
+    "Year": 2019,
+    "Latitude": "31.01447 ° N",
+    "Longitude": "77.99212°E"
+  },
+  {
+    "Location": "Hunzar hamlet in the Dachhan area of the Kishtwar district in Jammu & Kashmir",
+    "Date": 28,
+    "Month": 7,
+    "Year": 2021,
+    "Latitude": "33.32135°N ",
+    "Longitude": "76.28004°E"
+  },
+  {
+    "Location": "Ramgarh in Nainital district",
+    "Date": 17,
+    "Month": 10,
+    "Year": 2021,
+    "Latitude": "29.4464°N",
+    "Longitude": "79.5596°E"
+  },
+  {
+    "Location": "Ramgarh in Nainital district",
+    "Date": 18,
+    "Month": 10,
+    "Year": 2021,
+    "Latitude": "29.4464°N",
+    "Longitude": "79.5596°E"
+  },
+  {
+    "Location": "Ramgarh in Nainital district",
+    "Date": 19,
+    "Month": 10,
+    "Year": 2021,
+    "Latitude": "29.4464°N",
+    "Longitude": "79.5596°E"
+  },
+  {
+    "Location": "Amarnath in Jammu and Kashmir",
+    "Date": 7,
+    "Month": 8,
+    "Year": 2022,
+    "Latitude": "34.2157° N",
+    "Longitude": "75.5041° E"
+  },
+  {
+    "Location": "Maldevta Region, Dehradun, Uttarakhand",
+    "Date": 20,
+    "Month": 8,
+    "Year": 2022,
+    "Latitude": "30.3199264°N",
+    "Longitude": "78.103986°E"
+  },
+  {
+    "Location": "South Lhonak lake,North Sikim",
+    "Date": 10,
+    "Month": 4,
+    "Year": 2023,
+    "Latitude": "27.9456°N",
+    "Longitude": "88.3324°E"
+  }
+]
+;
+      var eventCounts = {};
+
+      // Create a map with markers for each location
+      var map = L.map("map").setView([30.0, 79.0], 6);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map);
+
+      // Count the number of events based on the combination of location, date, month, and year
+      data.forEach(function (point) {
+        var locationKey = point.Latitude + "-" + point.Longitude;
+
+        // Count events for each unique location
+        eventCounts[locationKey] = (eventCounts[locationKey] || 0) + 1;
+
+        // Add markers for each location
+        L.marker([parseFloat(point.Latitude), parseFloat(point.Longitude)])
+          .addTo(map)
+          .bindPopup(
+            point.Location +
+              "<br>Events: " +
+              eventCounts[locationKey]
+          );
+      });
+
+      // Create a bar graph
+      var ctx = document.getElementById("barChart").getContext("2d");
+      var barChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: Object.keys(eventCounts),
+          datasets: [
+            {
+              label: "Number of Events",
+              data: Object.values(eventCounts),
+              backgroundColor: "rgba(75, 192, 192, 0.2)",
+              borderColor: "rgba(75, 192, 192, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: {
+              type: "category",
+              labels: Object.keys(eventCounts),
+              position: "bottom",
+            },
+            y: {
+              min: 0,
+              title: {
+                display: true,
+                text: "Number of Events",
+              },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
